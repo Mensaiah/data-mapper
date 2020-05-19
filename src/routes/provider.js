@@ -31,6 +31,6 @@ router.post(
   ProviderController.loadData
 );
 
-router.get('/get-data/:providerId', ProviderController.getData);
+router.get('/filter/:providerId', ProviderController.getData);
 
 module.exports = router;
