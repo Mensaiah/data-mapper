@@ -34,8 +34,6 @@ module.exports = {
       fields.forEach(e => {
         dupRemoved.add(e);
       });
-      console.log(dupRemoved, 'Dup');
-      console.log(fields);
 
       if (dupRemoved.size !== fields.length) {
         res
@@ -69,7 +67,6 @@ module.exports = {
 
       return res.status(400).json({ message: 'Unable to add Specification' });
     } catch (error) {
-      console.log(error);
       res.status(500).json("Server Error don't worry we are fixing it");
     }
   },
@@ -148,7 +145,6 @@ module.exports = {
         return res.status(400).json({ message: 'Unable to Insert data' });
       }
     } catch (error) {
-      console.log(error);
       res.status(500).json("Server Error don't worry we are fixing it");
     }
   },
@@ -159,11 +155,8 @@ module.exports = {
         params: { providerId },
         query
       } = req;
-      console.log(query);
 
       let allFields;
-      // name=eqc:ciroma&age=eq:20&timestamp=gt: 1587614029
-      console.log(query);
 
       const addLogic = query => {
         let logic = '';
@@ -200,7 +193,6 @@ module.exports = {
 
         return logic;
       };
-      console.log('logic', addLogic(query));
 
       allFields = await sequelize.query(
         `SELECT DISTINCT outerFd."groupId", "name" as "fieldName", "providerId", timestamps, number, string  
@@ -224,9 +216,36 @@ module.exports = {
         }
       );
 
-      return res.json(allFields);
+      if (allFields.length === 0) {
+        return res.status(200).json([]);
+      }
+
+      const numOfGroups = allFields.slice(-1)[0].groupId;
+
+      const alldata = {
+        providerId: allFields[0].providerId,
+        data: []
+      };
+      for (let i = 0; i < numOfGroups; i++) {
+        const gData = {};
+        allFields.forEach(data => {
+          let mainData;
+          if (data.groupId === i + 1) {
+            if (data.number) {
+              mainData = data.number;
+            } else if (data.string) {
+              mainData = data.string;
+            } else {
+              mainData = data.timestamps;
+            }
+
+            gData[data.fieldName] = mainData;
+          }
+        });
+        alldata.data.push(gData);
+      }
+      return res.json(alldata);
     } catch (error) {
-      console.log(error);
       res.status(500).json("Server Error don't worry we are fixing it");
     }
   }
