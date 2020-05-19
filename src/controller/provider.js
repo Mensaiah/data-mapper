@@ -244,7 +244,7 @@ module.exports = {
         });
         alldata.data.push(gData);
       }
-      return res.json(alldata);
+      return res.status(200).json(alldata);
     } catch (error) {
       res.status(500).json("Server Error don't worry we are fixing it");
     }
